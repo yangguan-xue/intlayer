@@ -1190,6 +1190,8 @@ Intlayer での開発体験を向上させるために、公式の **Intlayer VS
 
 `vue-intlayer` は [Vue Devtools](https://devtools.vuejs.org/) に **Intlayer** パネルを標準で登録します。ブラウザの開発者ツールで **Vue** タブを開き、サイドバーで **Intlayer** を選択すると、辞書とロケールごとの翻訳を確認したり、アプリの現在のロケールを切り替えたりできます。
 
+アプリがリクエストしたキーのうち、読み込まれた辞書がないものは **Missing keys** グループに集約されるため、タイポや宣言し忘れたコンテンツに開発中に気づけます。
+
 [ビジュアルエディター](https://github.com/aymericzip/intlayer/blob/main/docs/docs/ja/intlayer_visual_editor.md) をセットアップしている場合は、プレーンテキストの翻訳をパネルから直接インライン編集することもできます。編集内容はコンテンツ宣言ファイルに書き戻され、アプリに即座にホットリロードされます。
 
 ### さらに進むために

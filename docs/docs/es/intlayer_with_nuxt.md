@@ -707,6 +707,8 @@ Para más detalles sobre cómo usar la extensión, consulta la [documentación d
 
 `vue-intlayer` registra un panel de **Intlayer** en [Vue Devtools](https://devtools.vuejs.org/) de forma predeterminada. Abre la pestaña **Vue** de las herramientas de desarrollo del navegador y selecciona **Intlayer** en la barra lateral para inspeccionar tus diccionarios y sus traducciones por idioma, o para cambiar el idioma actual de la aplicación.
 
+Las claves solicitadas por la aplicación que no tienen un diccionario cargado se recopilan en un grupo **Missing keys**, de modo que los errores tipográficos y las declaraciones de contenido olvidadas aparezcan durante el desarrollo.
+
 Cuando el [editor visual](https://github.com/aymericzip/intlayer/blob/main/docs/docs/es/intlayer_visual_editor.md) está configurado, las traducciones de texto plano también se pueden editar directamente desde el panel: los cambios se escriben de nuevo en tus archivos de declaración de contenido y se recargan en caliente en la aplicación.
 
 ### Ir más allá

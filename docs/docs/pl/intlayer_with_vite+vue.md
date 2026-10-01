@@ -1184,6 +1184,8 @@ Aby uzyskać więcej szczegółów na temat korzystania z rozszerzenia, zapoznaj
 
 `vue-intlayer` domyślnie rejestruje panel **Intlayer** w [Vue Devtools](https://devtools.vuejs.org/). Otwórz zakładkę **Vue** w narzędziach deweloperskich przeglądarki i wybierz **Intlayer** na pasku bocznym, aby przeglądać słowniki i ich tłumaczenia dla poszczególnych ustawień regionalnych albo przełączyć bieżące ustawienia regionalne aplikacji.
 
+Klucze żądane przez aplikację, które nie mają załadowanego słownika, są zbierane w grupie **Missing keys**, dzięki czemu literówki i zapomniane deklaracje treści wychodzą na jaw podczas tworzenia aplikacji.
+
 Gdy [edytor wizualny](https://github.com/aymericzip/intlayer/blob/main/docs/docs/pl/intlayer_visual_editor.md) jest skonfigurowany, tłumaczenia w postaci zwykłego tekstu można także edytować bezpośrednio w panelu: zmiany są zapisywane z powrotem w plikach deklaracji treści i natychmiast przeładowywane w aplikacji.
 
 ### Idź dalej

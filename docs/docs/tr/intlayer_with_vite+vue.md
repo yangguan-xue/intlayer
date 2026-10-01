@@ -1169,6 +1169,8 @@ Uzantının nasıl kullanılacağı hakkında daha fazla ayrıntı için [Intlay
 
 `vue-intlayer`, [Vue Devtools](https://devtools.vuejs.org/) içinde hazır olarak bir **Intlayer** paneli kaydeder. Sözlüklerinizi ve yerel ayar başına çevirilerini incelemek ya da uygulamanın geçerli yerel ayarını değiştirmek için tarayıcı geliştirici araçlarının **Vue** sekmesini açın ve kenar çubuğunda **Intlayer** öğesini seçin.
 
+Uygulama tarafından istenen ve yüklü bir sözlüğü olmayan anahtarlar **Missing keys** grubunda toplanır; böylece yazım hataları ve unutulmuş içerik bildirimleri geliştirme sırasında ortaya çıkar.
+
 [Görsel düzenleyici](https://github.com/aymericzip/intlayer/blob/main/docs/docs/tr/intlayer_visual_editor.md) kurulduğunda, düz metin çevirileri panelden satır içi olarak da düzenlenebilir: düzenlemeler içerik bildirim dosyalarınıza geri yazılır ve uygulamada anında yeniden yüklenir.
 
 ### Daha Fazla İlerle

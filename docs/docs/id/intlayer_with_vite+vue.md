@@ -1186,6 +1186,8 @@ Untuk detail lebih lanjut tentang cara menggunakan ekstensi ini, silakan merujuk
 
 `vue-intlayer` mendaftarkan panel **Intlayer** di [Vue Devtools](https://devtools.vuejs.org/) secara bawaan. Buka tab **Vue** di devtools browser Anda dan pilih **Intlayer** di bilah sisi untuk memeriksa kamus beserta terjemahannya per lokal, atau untuk mengganti lokal aktif aplikasi.
 
+Key yang diminta oleh aplikasi tetapi tidak memiliki kamus yang dimuat dikumpulkan dalam grup **Missing keys**, sehingga kesalahan ketik dan deklarasi konten yang terlupa terlihat saat pengembangan.
+
 Saat [editor visual](https://github.com/aymericzip/intlayer/blob/main/docs/docs/id/intlayer_visual_editor.md) telah disiapkan, terjemahan teks biasa juga dapat diedit langsung dari panel: perubahan ditulis kembali ke file deklarasi konten Anda dan dimuat ulang secara instan di aplikasi.
 
 ### Melangkah Lebih Jauh

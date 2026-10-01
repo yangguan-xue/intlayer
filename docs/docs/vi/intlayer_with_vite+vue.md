@@ -1181,6 +1181,8 @@ Tiện ích mở rộng này cung cấp:
 
 `vue-intlayer` đăng ký sẵn một bảng **Intlayer** trong [Vue Devtools](https://devtools.vuejs.org/). Mở tab **Vue** trong công cụ phát triển của trình duyệt và chọn **Intlayer** ở thanh bên để xem các từ điển cùng bản dịch theo từng locale, hoặc để chuyển locale hiện tại của ứng dụng.
 
+Các khóa được ứng dụng yêu cầu nhưng không có từ điển nào được tải sẽ được gom vào nhóm **Missing keys**, giúp lỗi đánh máy và các khai báo nội dung bị quên lộ ra trong quá trình phát triển.
+
 Khi đã thiết lập [trình chỉnh sửa trực quan](https://github.com/aymericzip/intlayer/blob/main/docs/docs/vi/intlayer_visual_editor.md), các bản dịch văn bản thuần túy cũng có thể được chỉnh sửa trực tiếp từ bảng: thay đổi được ghi lại vào tệp khai báo nội dung của bạn và tải lại nóng ngay trong ứng dụng.
 
 ### Tiến xa hơn

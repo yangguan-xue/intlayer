@@ -1181,6 +1181,8 @@ Intlayer 使用模块扩展 (module augmentation) 来利用 TypeScript 的优势
 
 `vue-intlayer` 默认会在 [Vue Devtools](https://devtools.vuejs.org/) 中注册一个 **Intlayer** 面板。打开浏览器开发者工具的 **Vue** 标签页，在侧边栏选择 **Intlayer**，即可查看各个字典及其各语言翻译，或切换应用当前的语言。
 
+应用请求了但未加载对应字典的 key 会被收集到 **Missing keys** 分组中，让拼写错误和遗漏的内容声明在开发过程中即时暴露。
+
 配置好[可视化编辑器](https://github.com/aymericzip/intlayer/blob/main/docs/docs/zh/intlayer_visual_editor.md)后，纯文本翻译还可以直接在面板中内联编辑：修改会写回你的内容声明文件，并在应用中即时热更新。
 
 ### 深入了解
