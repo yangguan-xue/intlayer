@@ -3,7 +3,7 @@ import { getDictionaries } from '@intlayer/dictionaries-entry';
 import type { Locale } from '@intlayer/types/allLocales';
 import type { Dictionary } from '@intlayer/types/dictionary';
 import { setupDevtoolsPlugin } from '@vue/devtools-api';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp, nextTick, ref } from 'vue';
 import { createIntlayerClient } from '../client/installIntlayer';
 import { setLocaleInStorage } from '../client/useLocaleStorage';
@@ -19,6 +19,12 @@ import {
   INTLAYER_DEVTOOLS_PLUGIN_ID,
   INTLAYER_DICTIONARIES_INSPECTOR_ID,
 } from './index';
+import {
+  clearMissingKeys,
+  MISSING_KEY_NODE_ID_PREFIX,
+  MISSING_KEYS_GROUP_NODE_ID,
+  reportMissingKey,
+} from './missingKeys';
 
 vi.mock('@vue/devtools-api', () => ({
   setupDevtoolsPlugin: vi.fn(),
@@ -81,6 +87,11 @@ type EditPayload = {
 type InspectorOptions = {
   id: string;
   label: string;
+  actions?: {
+    icon: string;
+    tooltip?: string;
+    action: () => void;
+  }[];
   nodeActions?: {
     icon: string;
     tooltip?: string;
@@ -832,5 +843,178 @@ describe('enableIntlayerDevtools editor server recovery', () => {
       'app-content::local::src/app.content.ts',
       LOCALES_GROUP_NODE_ID,
     ]);
+  });
+});
+
+describe('enableIntlayerDevtools missing keys', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    clearMissingKeys();
+    getDictionariesMock.mockReturnValue({});
+
+    // Editor server unreachable by default: the inspector stays read-only
+    getEditorDictionariesMock.mockRejectedValue(
+      new Error('connect ECONNREFUSED')
+    );
+    getEditorAPIMock.mockReturnValue({
+      getDictionaries: getEditorDictionariesMock,
+      writeDictionary: writeDictionaryMock,
+    } as never);
+  });
+
+  afterEach(() => {
+    clearMissingKeys();
+  });
+
+  it('lists a "Missing keys" group with a count tag, one child per key', async () => {
+    getDictionariesMock.mockReturnValue({ 'app-content': fakeDictionary });
+
+    const { treeHandler } = setupDevtools();
+
+    reportMissingKey('unknown-dictionary');
+    reportMissingKey('unknown-dictionary');
+    reportMissingKey('other-unknown');
+
+    const payload = buildTreePayload();
+    await treeHandler(payload);
+
+    const groupNode = payload.rootNodes.find(
+      (node) => node.id === MISSING_KEYS_GROUP_NODE_ID
+    );
+
+    expect(groupNode?.children?.map((node) => node.id)).toEqual([
+      `${MISSING_KEY_NODE_ID_PREFIX}unknown-dictionary`,
+      `${MISSING_KEY_NODE_ID_PREFIX}other-unknown`,
+    ]);
+    expect(groupNode?.tags?.[0]?.label).toBe('2');
+    // Inserted between the dictionaries and the Locales group
+    expect(payload.rootNodes.map((node) => node.id)).toEqual([
+      'app-content',
+      EDITOR_OFFLINE_NODE_ID,
+      MISSING_KEYS_GROUP_NODE_ID,
+      LOCALES_GROUP_NODE_ID,
+    ]);
+  });
+
+  it('lists the missing keys group when the editor server is online', async () => {
+    getEditorDictionariesMock.mockResolvedValue({
+      'app-content': [fakeDeclaration],
+    });
+
+    const { treeHandler } = setupDevtools();
+
+    reportMissingKey('unknown-dictionary');
+
+    const payload = buildTreePayload();
+    await treeHandler(payload);
+
+    expect(payload.rootNodes.map((node) => node.id)).toEqual([
+      'app-content::local::src/app.content.ts',
+      MISSING_KEYS_GROUP_NODE_ID,
+      LOCALES_GROUP_NODE_ID,
+    ]);
+  });
+
+  it('refreshes the inspector tree when a new missing key is reported', () => {
+    const { sendInspectorTree } = setupDevtools();
+
+    reportMissingKey('unknown-dictionary');
+
+    expect(sendInspectorTree).toHaveBeenCalledWith(
+      INTLAYER_DICTIONARIES_INSPECTOR_ID
+    );
+  });
+
+  it('stops listing a key once its dictionary is loaded', async () => {
+    getDictionariesMock.mockReturnValue({});
+
+    const { treeHandler } = setupDevtools();
+
+    reportMissingKey('late-dictionary');
+
+    // The dictionary shows up (e.g. lazy-loaded after the first request)
+    getDictionariesMock.mockReturnValue({
+      'late-dictionary': { ...fakeDictionary, key: 'late-dictionary' },
+    });
+
+    const payload = buildTreePayload();
+    await treeHandler(payload);
+
+    expect(
+      payload.rootNodes.some((node) => node.id === MISSING_KEYS_GROUP_NODE_ID)
+    ).toBe(false);
+  });
+
+  it('exposes the request count and timestamps on a missing key node', async () => {
+    getDictionariesMock.mockReturnValue({});
+
+    const { stateHandler } = setupDevtools();
+
+    reportMissingKey('unknown-dictionary');
+    reportMissingKey('unknown-dictionary');
+
+    const payload = buildStatePayload(
+      `${MISSING_KEY_NODE_ID_PREFIX}unknown-dictionary`
+    );
+    await stateHandler(payload);
+
+    const entries = payload.state['Missing key'];
+
+    expect(entries?.[0]).toEqual({
+      key: 'key',
+      value: 'unknown-dictionary',
+      editable: false,
+    });
+    expect(entries?.[1]).toEqual({
+      key: 'requests',
+      value: 2,
+      editable: false,
+    });
+    expect(entries?.[2]?.key).toBe('first seen');
+    expect(entries?.[3]?.key).toBe('last seen');
+  });
+
+  it('summarizes the missing keys on the group node state', async () => {
+    getDictionariesMock.mockReturnValue({});
+
+    const { stateHandler } = setupDevtools();
+
+    reportMissingKey('unknown-dictionary');
+
+    const payload = buildStatePayload(MISSING_KEYS_GROUP_NODE_ID);
+    await stateHandler(payload);
+
+    expect(payload.state['Missing keys']).toEqual([
+      {
+        key: 'unknown-dictionary',
+        value: 'requested 1 time(s)',
+        editable: false,
+      },
+    ]);
+  });
+
+  it('clears the missing keys through the inspector action', async () => {
+    getDictionariesMock.mockReturnValue({});
+
+    const { inspectorOptions, treeHandler, sendInspectorTree } =
+      setupDevtools();
+
+    reportMissingKey('unknown-dictionary');
+
+    const clearAction = inspectorOptions.actions?.find(
+      (action) => action.icon === 'delete'
+    );
+
+    clearAction?.action();
+
+    const payload = buildTreePayload();
+    await treeHandler(payload);
+
+    expect(
+      payload.rootNodes.some((node) => node.id === MISSING_KEYS_GROUP_NODE_ID)
+    ).toBe(false);
+    expect(sendInspectorTree).toHaveBeenCalledWith(
+      INTLAYER_DICTIONARIES_INSPECTOR_ID
+    );
   });
 });

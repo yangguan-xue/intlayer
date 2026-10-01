@@ -30,6 +30,16 @@ import {
   formatDictionaryForInspector,
   listInspectorEntries,
 } from './formatDictionaryForInspector';
+import {
+  buildMissingKeysGroupNode,
+  clearMissingKeys,
+  getKeyFromMissingKeyNodeId,
+  getMissingKeys,
+  isMissingKeyNodeId,
+  MISSING_KEYS_GROUP_NODE_ID,
+  type MissingKeyRecord,
+  onMissingKeysChange,
+} from './missingKeys';
 
 export const INTLAYER_DEVTOOLS_PLUGIN_ID = 'intlayer';
 export const INTLAYER_DICTIONARIES_INSPECTOR_ID =
@@ -67,6 +77,17 @@ const findDeclaration = (
   Object.values(unmergedDictionaries)
     .flat()
     .find((declaration) => getDeclarationNodeId(declaration) === nodeId);
+
+/**
+ * Missing keys still absent from the loaded dictionaries. A key requested
+ * before its dictionary finished loading stops being listed once the
+ * dictionary shows up.
+ */
+const getVisibleMissingKeys = (): MissingKeyRecord[] => {
+  const dictionaries = getDictionaries();
+
+  return getMissingKeys().filter((record) => !dictionaries[record.key]);
+};
 
 /**
  * Suffix distinguishing the declarations of a same dictionary key: the
@@ -116,6 +137,15 @@ export const enableIntlayerDevtools = (app: App): void => {
         label: 'Intlayer',
         icon: 'language',
         treeFilterPlaceholder: 'Search dictionaries',
+        actions: [
+          {
+            icon: 'delete',
+            tooltip: 'Clear missing keys',
+            // `clearMissingKeys` notifies the subscription above, which
+            // refreshes the tree
+            action: () => clearMissingKeys(),
+          },
+        ],
         nodeActions: [
           {
             icon: 'check',
@@ -155,6 +185,12 @@ export const enableIntlayerDevtools = (app: App): void => {
         }
       );
 
+      // Surface newly reported missing keys without waiting for the panel
+      // to be reopened.
+      onMissingKeysChange(() => {
+        api.sendInspectorTree(INTLAYER_DICTIONARIES_INSPECTOR_ID);
+      });
+
       api.on.getInspectorTree(async (payload) => {
         if (payload.inspectorId !== INTLAYER_DICTIONARIES_INSPECTOR_ID) return;
 
@@ -182,8 +218,13 @@ export const enableIntlayerDevtools = (app: App): void => {
               }))
           );
 
+          const missingKeys = getVisibleMissingKeys();
+
           payload.rootNodes = [
             ...declarationNodes,
+            ...(missingKeys.length > 0
+              ? [buildMissingKeysGroupNode(missingKeys)]
+              : []),
             buildLocalesInspectorNode(currentLocale),
           ];
           return;
@@ -207,12 +248,17 @@ export const enableIntlayerDevtools = (app: App): void => {
                 label: dictionaryKey,
               }));
 
+        const missingKeys = getVisibleMissingKeys();
+
         payload.rootNodes = [
           ...dictionaryNodes,
           {
             id: EDITOR_OFFLINE_NODE_ID,
             label: 'Enable live editing (editor server)',
           },
+          ...(missingKeys.length > 0
+            ? [buildMissingKeysGroupNode(missingKeys)]
+            : []),
           buildLocalesInspectorNode(currentLocale),
         ];
       });
@@ -243,6 +289,50 @@ export const enableIntlayerDevtools = (app: App): void => {
               {
                 key: 'current',
                 value: locale === currentLocale,
+                editable: false,
+              },
+            ],
+          };
+          return;
+        }
+
+        if (payload.nodeId === MISSING_KEYS_GROUP_NODE_ID) {
+          payload.state = {
+            'Missing keys': getVisibleMissingKeys().map((record) => ({
+              key: record.key,
+              value: `requested ${record.count} time(s)`,
+              editable: false,
+            })),
+          };
+          return;
+        }
+
+        if (isMissingKeyNodeId(payload.nodeId)) {
+          const key = getKeyFromMissingKeyNodeId(payload.nodeId);
+          const record = getMissingKeys().find(
+            (missingKey) => missingKey.key === key
+          );
+
+          payload.state = {
+            'Missing key': [
+              { key: 'key', value: key, editable: false },
+              {
+                key: 'requests',
+                value: record?.count ?? 0,
+                editable: false,
+              },
+              {
+                key: 'first seen',
+                value: record
+                  ? new Date(record.firstSeenAt).toLocaleTimeString()
+                  : '',
+                editable: false,
+              },
+              {
+                key: 'last seen',
+                value: record
+                  ? new Date(record.lastSeenAt).toLocaleTimeString()
+                  : '',
                 editable: false,
               },
             ],

@@ -714,6 +714,8 @@ Per maggiori dettagli su come utilizzare l'estensione, consulta la [documentazio
 
 `vue-intlayer` registra un pannello **Intlayer** in [Vue Devtools](https://devtools.vuejs.org/) in modo predefinito. Apri la scheda **Vue** degli strumenti di sviluppo del browser e seleziona **Intlayer** nella barra laterale per ispezionare i tuoi dizionari e le relative traduzioni per locale, oppure per cambiare la locale corrente dell'app.
 
+Le chiavi richieste dall'app che non hanno un dizionario caricato sono raccolte in un gruppo **Missing keys**, così i refusi e le dichiarazioni di contenuto dimenticate emergono durante lo sviluppo.
+
 Quando l'[editor visuale](https://github.com/aymericzip/intlayer/blob/main/docs/docs/it/intlayer_visual_editor.md) è configurato, le traduzioni in testo semplice possono anche essere modificate inline dal pannello: le modifiche vengono riscritte nei tuoi file di dichiarazione dei contenuti e ricaricate a caldo nell'app.
 
 ### Vai oltre

@@ -1182,6 +1182,8 @@ Para mais detalhes sobre como usar a extensão, consulte a [documentação da Ex
 
 O `vue-intlayer` registra um painel **Intlayer** nas [Vue Devtools](https://devtools.vuejs.org/) por padrão. Abra a aba **Vue** das ferramentas de desenvolvedor do navegador e selecione **Intlayer** na barra lateral para inspecionar seus dicionários e suas traduções por idioma, ou para trocar o idioma atual do aplicativo.
 
+As chaves solicitadas pelo aplicativo que não têm um dicionário carregado são reunidas em um grupo **Missing keys**, para que erros de digitação e declarações de conteúdo esquecidas apareçam durante o desenvolvimento.
+
 Quando o [editor visual](https://github.com/aymericzip/intlayer/blob/main/docs/docs/pt/intlayer_visual_editor.md) está configurado, as traduções em texto simples também podem ser editadas diretamente no painel: as alterações são gravadas de volta nos seus arquivos de declaração de conteúdo e recarregadas imediatamente no aplicativo.
 
 ### Ir Além
